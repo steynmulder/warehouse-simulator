@@ -17,11 +17,13 @@ FetchContent_Declare(SFML
 FetchContent_MakeAvailable(SFML)
 
 include_directories(
-    ${PROJECT_SOURCE_DIR}/include
+    ${PROJECT_SOURCE_DIR}/includes
 )
 
 add_executable(main 
     src/main.cpp
+    src/graphics.cpp
+    src/robot.cpp
 )
 
 target_link_libraries(main PRIVATE sfml-graphics sfml-window sfml-system)
