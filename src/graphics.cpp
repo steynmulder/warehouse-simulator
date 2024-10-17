@@ -8,9 +8,12 @@
 using namespace std;
 
 float POINT_RADIUS = 4.0f;
+int FPS = 60;
 
 void draw(int width, vector<Robot> robots) {
     sf::RenderWindow window(sf::VideoMode(width, width), "Warehouse Simulator");
+
+    window.setFramerateLimit(FPS);
 
     // create robot rects
     vector<sf::RectangleShape> robot_shapes;
@@ -84,9 +87,7 @@ void draw(int width, vector<Robot> robots) {
                 robot.getPosition().y + robot.getSize().y / 2 + id_bounds.height / 2));
             window.draw(id);
         }
-        
-        
-        
+
         window.display();
     }
 
