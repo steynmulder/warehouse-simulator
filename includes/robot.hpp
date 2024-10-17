@@ -16,6 +16,7 @@ class Robot {
         Robot(int id, float x, float y, float theta, int width, int length);
 
         void move(std::vector<float>);
+        void rotate(float);
 
         // getters and setters
         int getId() {return id;}

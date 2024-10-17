@@ -14,9 +14,11 @@ Robot::Robot(int id, float x, float y, float theta, int width, int length) {
     this->length = length;
 }
 
-
-// TODO make smooth movement
 void Robot::move(vector<float> move) {
     Robot::setX(Robot::getPosition().x + move[0]);
     Robot::setY(Robot::getPosition().y + move[1]);
+}
+
+void Robot::rotate(float angle) {
+    Robot::setTheta(Robot::getTheta() + angle);
 }

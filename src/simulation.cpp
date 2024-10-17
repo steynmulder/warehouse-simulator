@@ -58,8 +58,7 @@ void simulate(int width, vector<Robot> robots) {
 
         //updating
         for (Robot& robot : robots) {
-            vector<float> move_dir = {1.0f, 0.0f};
-            robot.move(move_dir);
+            break;
         }
 
 
