@@ -1,4 +1,4 @@
-#include "graphics.hpp"
+#include "simulation.hpp"
 #include "robot.hpp"
 
 #include<SFML/Graphics.hpp>
@@ -10,7 +10,7 @@ using namespace std;
 float POINT_RADIUS = 4.0f;
 int FPS = 60;
 
-void draw(int width, vector<Robot> robots) {
+void simulate(int width, vector<Robot> robots) {
     sf::RenderWindow window(sf::VideoMode(width, width), "Warehouse Simulator");
 
     window.setFramerateLimit(FPS);
@@ -56,6 +56,14 @@ void draw(int width, vector<Robot> robots) {
                 window.close();
         }
 
+        //updating
+        for (Robot& robot : robots) {
+            vector<float> move_dir = {1.0f, 0.0f};
+            robot.move(move_dir);
+        }
+
+
+        // drawing
         window.clear();
         for (int i = 0; i < robots.size(); ++i) {
             // draw robot

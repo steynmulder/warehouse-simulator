@@ -22,7 +22,7 @@ include_directories(
 
 add_executable(main 
     src/main.cpp
-    src/graphics.cpp
+    src/simulation.cpp
     src/robot.cpp
 )
 

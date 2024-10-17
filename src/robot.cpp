@@ -1,6 +1,7 @@
 #include "robot.hpp"
 
 #include <vector>
+#include <iostream>
 
 using namespace std;
 
@@ -16,6 +17,6 @@ Robot::Robot(int id, float x, float y, float theta, int width, int length) {
 
 // TODO make smooth movement
 void Robot::move(vector<float> move) {
-    // Robot::setX(Robot::getX() + move[0]);
-    // Robot::setY(Robot::getY() + move[1]);
+    Robot::setX(Robot::getPosition().x + move[0]);
+    Robot::setY(Robot::getPosition().y + move[1]);
 }

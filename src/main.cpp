@@ -1,7 +1,7 @@
 #include <iostream>
 #include<vector>
 
-#include "graphics.hpp"
+#include "simulation.hpp"
 #include "robot.hpp"
 
 using namespace std;
@@ -21,7 +21,7 @@ int main() {
     robots.push_back(robot3);
 
     
-    draw(WIDTH, robots);
+    simulate(WIDTH, robots);
 
     return 0;
 }
