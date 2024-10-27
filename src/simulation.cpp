@@ -1,24 +1,30 @@
 #include "simulation.hpp"
 #include "robot.hpp"
+#include "obstacle.hpp"
+#include "wall.hpp"
 
 #include<SFML/Graphics.hpp>
 #include <vector>
 #include <iostream>
+#include<cmath>
+#include <memory>
+#include <unordered_map>
 
 using namespace std;
 
 float POINT_RADIUS = 4.0f;
 int FPS = 60;
 
-void simulate(int width, vector<Robot> robots) {
+void simulate(int width, vector<shared_ptr<Obstacle>> obstacles) {
     sf::RenderWindow window(sf::VideoMode(width, width), "Warehouse Simulator");
 
     window.setFramerateLimit(FPS);
 
     // create robot rects
-    vector<sf::RectangleShape> robot_shapes;
-    vector<sf::CircleShape> midpoints;
-    vector<sf::Text> ids;
+    unordered_map<int, sf::RectangleShape> robot_shapes;
+    unordered_map<int, sf::RectangleShape> wall_shapes;
+    unordered_map<int, sf::CircleShape> midpoints;
+    unordered_map<int, sf::Text> ids;
 
     // load arial font for robot ids
     sf::Font font;
@@ -26,28 +32,49 @@ void simulate(int width, vector<Robot> robots) {
         // TODO error
     }
 
-    for (Robot& robot : robots) {
-        // initialize robots
-        sf::RectangleShape rect(robot.getSize());
-        rect.setFillColor(sf::Color(
-            robot.getId() * 50,
-                200 - (robot.getId() * 50),
-                200 + (robot.getId() * 10),
-                255));
-        robot_shapes.push_back(rect);
+    for (const auto& obstacle : obstacles) {
+        switch (obstacle->getType()) {
+            case Obstacle::Robot:
+            {
+                // initialize robots
+                sf::RectangleShape rect(obstacle->getSize());
+                rect.setFillColor(sf::Color(
+                    obstacle->getId() * 50,
+                        200 - (obstacle->getId() * 50),
+                        200 + (obstacle->getId() * 10),
+                        255));
+                robot_shapes[obstacle->getId()] = rect;
 
-        // initialize midpoints
-        sf::CircleShape point(POINT_RADIUS);
-        point.setFillColor(sf::Color::White);
-        midpoints.push_back(point);
+                // initialize midpoints
+                sf::CircleShape point(POINT_RADIUS);
+                point.setFillColor(sf::Color::White);
+                midpoints[obstacle->getId()] = point;
 
-        // initialize robot id
-        sf::Text id;
-        id.setFont(font);
-        id.setString("id: " + to_string(robot.getId()));
-        id.setCharacterSize(16);
-        ids.push_back(id);
+                // initialize robot id
+                sf::Text id;
+                id.setFont(font);
+                id.setString("id: " + to_string(obstacle->getId()));
+                id.setCharacterSize(16);
+                ids[obstacle->getId()] = id;
+                break;
+            }
+            case Obstacle::Wall:
+            {
+                // initialize walls
+                sf::RectangleShape rect(obstacle->getSize());
+                rect.setFillColor(sf::Color(64, 64, 64));
+                wall_shapes[obstacle->getId()] = rect;
+                break;
+            }
+            default:
+            {
+                cout << "TODO default" << endl; // TODO
+                break;
+            }
+        };
+        
     }
+
 
     while (window.isOpen()) {
         sf::Event event;
@@ -57,42 +84,116 @@ void simulate(int width, vector<Robot> robots) {
         }
 
         //updating
-        for (Robot& robot : robots) {
-            break;
+        for (int i = 0; i < obstacles.size(); ++i) {
+            switch (obstacles[i]->getType()) {
+                case Obstacle::Robot:
+                {
+                    Robot* robot = dynamic_cast<Robot*>(obstacles[i].get());
+                    if (robot) {
+                        bool colliding = false;
+                        for (const auto& obs : obstacles) {
+                            if (robot->getId() != obs->getId()) {
+                                if (robot->isColliding(*obs)) {
+                                    colliding = true;
+                                    break;
+                                }
+                            }
+                            
+                        }
+
+                        if (!colliding) {
+                            robot->move({-1.0f, 0.5f});
+                            robot->rotate(powf(-1, i+1) * -1.0f);
+                        }
+                    } else {
+                        // TODO error
+                    }
+                    break;
+                    
+                }
+                default:
+                {
+                    //TODO error
+                    break;
+                }
+            };
+            
         }
 
 
         // drawing
-        window.clear();
-        for (int i = 0; i < robots.size(); ++i) {
-            // draw robot
-            sf::RectangleShape rect = robot_shapes[i];
-            Robot robot = robots[i];
-            
-            int a = (rect.getPosition().x + rect.getSize().x / 2);
-            int b = (rect.getPosition().y + rect.getSize().y / 2);
-            rect.setOrigin(a, b);
-            
-            rect.setPosition(robot.getPosition());
-            rect.setRotation(robot.getTheta());
-            rect.setPosition(rect.getPosition().x + rect.getOrigin().x, rect.getPosition().y + rect.getOrigin().y);
-            
-            window.draw(rect);
+        window.clear(sf::Color(255, 248, 226));
+        for (const auto& obstacle : obstacles) {
+            switch (obstacle->getType()) {
+                case Obstacle::Robot:
+                {
+                    Robot* robot = dynamic_cast<Robot*>(obstacle.get());
+                    if (robot) {
+                        // draw robot
+                        sf::RectangleShape rect = robot_shapes[robot->getId()];
+                        
+                        int a = (rect.getPosition().x + rect.getSize().x / 2);
+                        int b = (rect.getPosition().y + rect.getSize().y / 2);
+                        rect.setOrigin(a, b);
+                        
+                        rect.setPosition(robot->getPosition());
+                        // rotation in this function is in clockwise direction, we want counterclockwise
+                        rect.setRotation(robot->getTheta());
+                        rect.setPosition(rect.getPosition().x + rect.getOrigin().x, rect.getPosition().y + rect.getOrigin().y);
+                        
+                        window.draw(rect);
 
-            // draw midpoint of robot
-            sf::CircleShape point = midpoints[i];
-            point.setPosition(sf::Vector2f(
-                robot.getPosition().x + robot.getSize().x / 2 - POINT_RADIUS,
-                robot.getPosition().y + robot.getSize().y / 2 - POINT_RADIUS));
-            window.draw(point);
+                        // draw midpoint of robot
+                        sf::CircleShape point = midpoints[robot->getId()];
+                        point.setFillColor(sf::Color::Green);
+                        float cx = robot->getPosition().x + robot->getSize().x / 2 - POINT_RADIUS / 2;
+                        float cy = robot->getPosition().y + robot->getSize().y / 2 - POINT_RADIUS / 2;
+                        point.setPosition(cx, cy);
+                        window.draw(point);
 
-            // draw robot id
-            sf::Text id = ids[i];
-            sf::FloatRect id_bounds = id.getLocalBounds();
-            id.setPosition(sf::Vector2f(
-                robot.getPosition().x + robot.getSize().x / 2 - id_bounds.width / 2,
-                robot.getPosition().y + robot.getSize().y / 2 + id_bounds.height / 2));
-            window.draw(id);
+
+                        // draw robot id
+                        sf::Text id = ids[robot->getId()];
+                        sf::FloatRect id_bounds = id.getLocalBounds();
+                        id.setPosition(sf::Vector2f(
+                            robot->getPosition().x + robot->getSize().x / 2 - id_bounds.width / 2,
+                            robot->getPosition().y + robot->getSize().y / 2 + id_bounds.height / 2));
+                        window.draw(id);
+                    } else {
+                        // TODO error
+                    }
+                    break;
+                    
+                }
+                case Obstacle::Wall:
+                {
+                    Wall* wall = dynamic_cast<Wall*>(obstacle.get());
+                    if (wall) {
+                        sf::RectangleShape rect = wall_shapes[wall->getId()];
+
+                        int a = (rect.getPosition().x + rect.getSize().x / 2);
+                        int b = (rect.getPosition().y + rect.getSize().y / 2);
+                        rect.setOrigin(a, b);
+                        
+                        rect.setPosition(wall->getPosition());
+                        // rotation in this function is in clockwise direction, we want counterclockwise
+                        rect.setRotation(wall->getTheta());
+                        rect.setPosition(rect.getPosition().x + rect.getOrigin().x, rect.getPosition().y + rect.getOrigin().y);
+                        
+                        window.draw(rect);
+                    } else {
+                        // TODO error
+                    }
+                    break;
+                    
+                }
+                default:
+                {
+                    // TODO error
+                    break;
+                }
+            };
+            
         }
 
         window.display();

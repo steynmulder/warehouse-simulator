@@ -1,27 +1,34 @@
 #include <iostream>
 #include<vector>
+#include <memory>
 
 #include "simulation.hpp"
 #include "robot.hpp"
+#include "wall.hpp"
+#include "obstacle.hpp"
 
 using namespace std;
 
 
 int main() {
     int WIDTH = 800;
+    int OUTER_WALL_WIDTH = 15;
 
-    Robot robot1(0, 200, 200, 0, 50, 50);
-    Robot robot2(1, 100, 600, 45, 50, 50);
-    Robot robot3(2, 100, 200, 25, 50, 50);
+    vector<shared_ptr<Obstacle>> obstacles;
 
-    vector<Robot> robots;
-
-    robots.push_back(robot1);
-    // robots.push_back(robot2);
-    robots.push_back(robot3);
+    obstacles.push_back(make_shared<Robot>(0, 500, 200, 0, 50, 50));
+    obstacles.push_back(make_shared<Robot>(2, 50, 270, 45, 50, 50));
 
     
-    simulate(WIDTH, robots);
+    obstacles.push_back(make_shared<Wall>(10, 0, 0, 0, WIDTH, OUTER_WALL_WIDTH));
+    obstacles.push_back(make_shared<Wall>(11, 0, 0, 0, OUTER_WALL_WIDTH, WIDTH));
+    obstacles.push_back(make_shared<Wall>(12, 0, (float) WIDTH - OUTER_WALL_WIDTH, 0, WIDTH, OUTER_WALL_WIDTH));
+    obstacles.push_back(make_shared<Wall>(13, (float) WIDTH - OUTER_WALL_WIDTH, 0, 0, OUTER_WALL_WIDTH, WIDTH));
+
+    obstacles.push_back(make_shared<Wall>(14, 400, 300, 23.987, 100, 39));
+
+    
+    simulate(WIDTH, obstacles);
 
     return 0;
 }

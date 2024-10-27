@@ -24,6 +24,8 @@ add_executable(main
     src/main.cpp
     src/simulation.cpp
     src/robot.cpp
+    src/obstacle.cpp
+    src/wall.cpp
 )
 
 target_link_libraries(main PRIVATE sfml-graphics sfml-window sfml-system)
