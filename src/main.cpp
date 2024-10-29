@@ -1,6 +1,7 @@
 #include <iostream>
 #include<vector>
 #include <memory>
+#include <unordered_set>
 
 #include "simulation.hpp"
 #include "robot.hpp"
@@ -8,7 +9,6 @@
 #include "obstacle.hpp"
 
 using namespace std;
-
 
 int main() {
     int WIDTH = 800;
@@ -25,10 +25,18 @@ int main() {
     obstacles.push_back(make_shared<Wall>(12, 0, (float) WIDTH - OUTER_WALL_WIDTH, 0, WIDTH, OUTER_WALL_WIDTH));
     obstacles.push_back(make_shared<Wall>(13, (float) WIDTH - OUTER_WALL_WIDTH, 0, 0, OUTER_WALL_WIDTH, WIDTH));
 
-    obstacles.push_back(make_shared<Wall>(14, 400, 300, 23.987, 100, 39));
+    // obstacles.push_back(make_shared<Wall>(14, 400, 300, 23.987, 100, 39));
 
     
     simulate(WIDTH, obstacles);
+
+    // std::unordered_set<std::pair<float, float>, Lidar::pair_hash> test_set;
+    // test_set.insert({1.0f, 2.0f});
+
+    // for (const auto& p : test_set) {
+    //     std::cout << "(" << p.first << ", " << p.second << ")\n";
+    // }
+
 
     return 0;
 }

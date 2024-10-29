@@ -5,7 +5,7 @@
 
 using namespace std;
 
-Robot::Robot(int id, float x, float y, float theta, int width, int height) : Obstacle::Obstacle(id, x, y, width, height, theta, Obstacle::Robot) {
+Robot::Robot(int id, float x, float y, float theta, int width, int height) : Obstacle::Obstacle(id, x, y, width, height, theta, Obstacle::Robot), lidar(id, x, y) {
 
     this->id = id;
     this->x =x ;
@@ -18,6 +18,8 @@ Robot::Robot(int id, float x, float y, float theta, int width, int height) : Obs
 void Robot::move(vector<float> move) {
     Robot::setX(Robot::getPosition().x + move[0]);
     Robot::setY(Robot::getPosition().y + move[1]);
+
+    this->lidar.setPosition(this->x + this->width/2, this->y + this->height/2);
 }
 
 void Robot::rotate(float angle) {

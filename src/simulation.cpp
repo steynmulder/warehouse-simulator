@@ -32,6 +32,9 @@ void simulate(int width, vector<shared_ptr<Obstacle>> obstacles) {
         // TODO error
     }
 
+    // create robot lidar pointclouds
+    unordered_set<pair<float, float>, Lidar::pair_hash> lidar_points;
+
     for (const auto& obstacle : obstacles) {
         switch (obstacle->getType()) {
             case Obstacle::Robot:
@@ -75,6 +78,7 @@ void simulate(int width, vector<shared_ptr<Obstacle>> obstacles) {
         
     }
 
+    float alpha = 0;
 
     while (window.isOpen()) {
         sf::Event event;
@@ -102,8 +106,15 @@ void simulate(int width, vector<shared_ptr<Obstacle>> obstacles) {
                         }
 
                         if (!colliding) {
-                            robot->move({-1.0f, 0.5f});
-                            robot->rotate(powf(-1, i+1) * -1.0f);
+                            cout << alpha << endl;
+                            robot->move({cosf(alpha), powf(-1, i+1) * sinf(alpha)});
+                            // robot->rotate();
+                        }
+
+                        // scanning
+                        if (robot->getId() == 0) {
+                            unordered_set<pair<float, float>, Lidar::pair_hash> points = robot->getLidar().scan(obstacles);
+                            lidar_points.insert(points.begin(), points.end());
                         }
                     } else {
                         // TODO error
@@ -119,6 +130,8 @@ void simulate(int width, vector<shared_ptr<Obstacle>> obstacles) {
             };
             
         }
+        alpha += 0.05;
+        if (alpha > M_2_PI) {alpha = 0;}
 
 
         // drawing
@@ -195,6 +208,15 @@ void simulate(int width, vector<shared_ptr<Obstacle>> obstacles) {
             };
             
         }
+
+        for (pair<float, float> coord : lidar_points) {
+            sf::CircleShape p(5.0f);
+            p.setFillColor(sf::Color(255, 0, 0, 128));
+            p.setPosition(sf::Vector2f(coord.first, coord.second));
+            window.draw(p);
+        }
+
+        cout << lidar_points.size() << endl;
 
         window.display();
     }
